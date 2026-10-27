@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>도파민 팡팡! 병맛 예문 자판기</title>
+  <style>
+    /* ========================================================
+       도파민 팡팡! 쨍한 핑크 네온 자판기 스타일시트
+       ======================================================== */
+    :root {
+      --bg-pink: #ff1493;
+      --bg-pink-dark: #b80068;
+      --neon-cyan: #00f3ff;
+      --neon-yellow: #fff200;
+      --neon-lime: #00ff66;
+      --neon-purple: #9d00ff;
+      --vending-red: #ff2a5f;
+      --vending-dark-red: #ba0c37;
+      --vending-body: #ff3366;
+      --vending-accent: #ffb3c6;
+      --panel-dark: #1f1124;
+      --panel-glass: rgba(255, 255, 255, 0.25);
+      --text-white: #ffffff;
+      --card-bg: #ffffff;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 30%, #ff2a8d 0%, #e60067 50%, #990042 100%);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+      color: #333;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .bg-bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      animation: floatUp 8s infinite ease-in;
+    }
+    .bubble:nth-child(1) { width: 40px; height: 40px; left: 10%; animation-duration: 7s; }
+    .bubble:nth-child(2) { width: 60px; height: 60px; left: 25%; animation-duration: 9s; animation-delay: 1s; }
+    .bubble:nth-child(3) { width: 30px; height: 30px; left: 45%; animation-duration: 6s; animation-delay: 2s; }
+    .bubble:nth-child(4) { width: 70px; height: 70px; left: 70%; animation-duration: 11s; animation-delay: 0.5s; }
+    .bubble:nth-child(5) { width: 50px; height: 50px; left: 85%; animation-duration: 8s; animation-delay: 3s; }
+
+    @keyframes floatUp {
+      0% { transform: translateY(105vh) scale(0.8); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+
+    .top-bar {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      z-index: 10;
+    }
+
+    .badge-class {
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--neon-yellow);
+      font-weight: 800;
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(4px);
+      letter-spacing: 0.5px;
+    }
+
+    .sound-btn {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s;
+    }
+    .sound-btn:active {
+      transform: scale(0.95);
+    }
+
+    .vending-machine {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 600px;
+      background: linear-gradient(145deg, #ff3377, #d90057);
+      border: 6px solid #ffccd9;
+      border-radius: 36px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 3px 6px rgba(255, 255, 255, 0.6);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .machine-header {
+      background: #190524;
+      border: 3px solid var(--neon-cyan);
+      border-radius: 20px;
+      padding: 12px 14px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .machine-header::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(60deg, transparent 40%, rgba(255, 255, 255, 0.25) 50%, transparent 60%);
+      animation: lightShine 4s infinite linear;
+      pointer-events: none;
+    }
+
+    @keyframes lightShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .machine-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 6px #ff0077, 0 0 12px #ff0077, 0 0 20px var(--neon-yellow);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .machine-subtitle {
+      color: var(--neon-yellow);
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 4px;
+      text-shadow: 0 0 4px rgba(255, 242, 0, 0.8);
+    }
+
+    .name-input-panel {
+      background: #fff0f5;
+      border-radius: 20px;
+      padding: 14px 16px;
+      border: 3px solid #ff99bb;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    .input-section-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: #a8004b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .name-input-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .name-input {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 800;
+      border: 3px solid #ff5983;
+      border-radius: 14px;
+      background: white;
+      color: #222;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .name-input:focus {
+      border-color: #9d00ff;
+      box-shadow: 0 0 10px rgba(157, 0, 255, 0.3);
+    }
+
+    .name-input::placeholder {
+      color: #aaa;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .random-name-btn {
+      background: #ffecf2;
+      border: 2px solid #ff7597;
+      color: #b3004b;
+      padding: 0 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .random-name-btn:hover {
+      background: #ffd6e3;
+    }
+    .random-name-btn:active {
+      transform: scale(0.95);
+    }
+
+    .vending-showcase {
+      background: #11051b;
+      border: 3px solid #63194a;
+      border-radius: 22px;
+      padding: 14px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .showcase-label {
+      color: var(--neon-cyan);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .can-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .can-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .can-item {
+      background: linear-gradient(180deg, #2f1738 0%, #1c0a24 100%);
+      border: 2px solid #58266d;
+      border-radius: 14px;
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    .can-item:hover {
+      transform: translateY(-3px) scale(1.02);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+    }
+
+    .can-item.selected {
+      border-color: var(--neon-yellow);
+      background: linear-gradient(180deg, #4d1c61 0%, #300c3f 100%);
+      box-shadow: 0 0 14px rgba(255, 242, 0, 0.8), inset 0 0 8px rgba(255, 242, 0, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .can-item.selected::after {
+      content: "SELECTED! ✓";
+      position: absolute;
+      top: -8px;
+      background: var(--neon-yellow);
+      color: #000;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    .can-icon {
+      font-size: 32px;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    }
+
+    .can-name {
+      font-size: 14px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .dispense-btn {
+      width: 100%;
+      background: linear-gradient(180deg, #00ff73 0%, #00bb50 100%);
+      color: #0b3819;
+      border: 3px solid #ffffff;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #008739, 0 10px 15px rgba(0,0,0,0.25);
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .dispense-btn:hover {
+      background: linear-gradient(180deg, #2aff8c 0%, #00d45b 100%);
+    }
+
+    .dispense-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #008739, 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .vending-tray {
+      background: #25091a;
+      border: 4px solid #14040e;
+      border-radius: 16px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7d4469;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 8px 12px rgba(0,0,0,0.7);
+    }
+
+    .tray-flap {
+      position: absolute;
+      width: 90%;
+      height: 80%;
+      background: #3d102c;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff85b2;
+      border: 1px solid #5a1d43;
+      transition: transform 0.3s;
+    }
+
+    .tray-flap.open {
+      transform: rotateX(75deg);
+    }
+
+    .result-card-container {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .sentence-card {
+      background: #ffffff;
+      border: 4px solid #331038;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      position: relative;
+    }
+
+    .sentence-card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ff0077;
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 3px 6px rgba(255, 0, 119, 0.3);
+    }
+
+    .tooltip-hint {
+      font-size: 12px;
+      color: #7b2cbf;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .english-sentence-box {
+      background: #fbf5ff;
+      border-left: 6px solid #9d00ff;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+
+    .english-sentence {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1a1a2e;
+      line-height: 1.7;
+      word-break: keep-all;
+    }
+
+    .rel-pronoun-hl {
+      background: #fff066;
+      color: #c40058;
+      padding: 2px 8px;
+      border-radius: 8px;
+      border-bottom: 3px solid #ffaa00;
+      display: inline-block;
+      font-weight: 900;
+    }
+
+    .vocab-word {
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      border-bottom: 2px dotted #ff0077;
+      border-radius: 4px;
+      padding: 0 2px;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .vocab-word:hover,
+    .vocab-word.active-tip {
+      background: #ffe3ef;
+      color: #b80053;
+    }
+
+    .vocab-word::after {
+      content: attr(data-meaning);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #1a0826;
+      color: #fff200;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 100;
+      border: 1px solid rgba(255, 242, 0, 0.4);
+    }
+
+    .vocab-word::before {
+      content: "";
+      position: absolute;
+      bottom: calc(100% + 2px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      border-width: 6px 6px 0 6px;
+      border-style: solid;
+      border-color: #1a0826 transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 100;
+    }
+
+    .vocab-word:hover::after,
+    .vocab-word:hover::before,
+    .vocab-word.active-tip::after,
+    .vocab-word.active-tip::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .korean-toggle-btn {
+      background: #f0e6ff;
+      border: 2px solid #b580ff;
+      color: #581c87;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      transition: all 0.15s;
+    }
+
+    .korean-toggle-btn:hover {
+      background: #e4d4ff;
+    }
+
+    .korean-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    .korean-translation-box {
+      display: none;
+      background: #fff8f0;
+      border: 2px dashed #ff9900;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 16px;
+      color: #4a2800;
+      line-height: 1.5;
+      font-weight: 700;
+      margin-bottom: 14px;
+      word-break: keep-all;
+      animation: popIn 0.25s ease;
+    }
+
+    .grammar-tip-box {
+      background: #e9fbf0;
+      border: 2px dashed #00b853;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #0d5c2d;
+    }
+
+    .grammar-tip-title {
+      font-weight: 900;
+      color: #007736;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .start-quiz-btn {
+      width: 100%;
+      background: linear-gradient(180deg, #ff007b 0%, #c40058 100%);
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #85003b, 0 8px 15px rgba(0,0,0,0.25);
+      margin-top: 14px;
+      transition: all 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .start-quiz-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #85003b;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      border: 4px solid #331038;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      position: relative;
+    }
+
+    .quiz-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ff8c00;
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    .quiz-prompt {
+      font-size: 16px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .quiz-sentence-box {
+      background: #fff9e6;
+      border: 3px solid #ffd454;
+      border-radius: 16px;
+      padding: 18px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #2b1d00;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      word-break: keep-all;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .option-btn {
+      background: #f8f9fa;
+      border: 3px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #2d3748;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: #ff0077;
+      background: #fff5f8;
+      transform: translateX(4px);
+    }
+
+    .option-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .option-btn.correct-choice {
+      background: #e6ffed !important;
+      border-color: #00c853 !important;
+      color: #007733 !important;
+      box-shadow: 0 0 12px rgba(0, 200, 83, 0.4);
+    }
+
+    .option-btn.wrong-choice {
+      background: #ffebee !important;
+      border-color: #ff3d00 !important;
+      color: #b71c1c !important;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .option-indicator {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .feedback-banner {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      animation: popIn 0.3s ease;
+    }
+
+    .feedback-banner.correct {
+      background: #e6fff0;
+      border: 3px solid #00c853;
+      color: #006629;
+    }
+
+    .feedback-banner.wrong {
+      background: #fff0f2;
+      border: 3px solid #ff2a5f;
+      color: #9c0028;
+    }
+
+    .feedback-head {
+      font-size: 19px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .feedback-body {
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .wrong-action-buttons {
+      display: none;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .retry-btn {
+      flex: 1;
+      background: #ff5983;
+      color: white;
+      border: 2px solid #fff;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #b3004b;
+      transition: all 0.1s;
+    }
+    .retry-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #b3004b;
+    }
+
+    .reveal-btn {
+      flex: 1;
+      background: #5b21b6;
+      color: white;
+      border: 2px solid #fff;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #3b0764;
+      transition: all 0.1s;
+    }
+    .reveal-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #3b0764;
+    }
+
+    .finish-action-box {
+      display: none;
+      animation: popIn 0.3s ease;
+    }
+
+    .restart-btn {
+      width: 100%;
+      background: linear-gradient(180deg, #ffea00 0%, #ffaa00 100%);
+      color: #4a2800;
+      border: 3px solid #ffffff;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #b87a00, 0 10px 15px rgba(0,0,0,0.2);
+      transition: all 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .restart-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #b87a00;
+    }
+
+    #fxCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .vending-footer {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: center;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 배경 거품 -->
+  <div class="bg-bubbles">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+  </div>
+
+  <canvas id="fxCanvas"></canvas>
+
+  <div class="top-bar">
+    <div class="badge-class">⚡ 중2 영어 | 관계대명사 완전정복</div>
+    <button class="sound-btn" id="soundToggleBtn" onclick="toggleSound()">
+      <span id="soundIcon">🔊</span> <span id="soundText">소리 ON</span>
+    </button>
+  </div>
+
+  <main class="vending-machine" id="vendingMachine">
+    <header class="machine-header">
+      <h1 class="machine-title">
+        <span>🥤</span> 도파민 팡팡! 병맛 예문 자판기 <span>⚡</span>
+      </h1>
+      <p class="machine-subtitle">관계대명사(who, which, whose, that, what) 1초 컷 마스터!</p>
+    </header>
+
+    <section id="step1Showcase">
+      <div class="name-input-panel">
+        <div class="input-section-title">
+          <span>👤</span> 주인공 이름 입력 (나, 친구, 최애 아이돌!)
+        </div>
+        <div class="name-input-box">
+          <input 
+            type="text" 
+            id="studentNameInput" 
+            class="name-input" 
+            placeholder="예: 민지, 태형, 지우, 카리나" 
+            maxlength="10"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="random-name-btn" type="button" onclick="insertRandomName()">🎲 추천</button>
+        </div>
+      </div>
+
+      <div class="vending-showcase" style="margin-top: 12px;">
+        <div class="showcase-label">
+          <span>✨</span> 마음에 드는 병맛 음료 테마를 골라보세요! (클릭)
+        </div>
+        <div class="can-grid" id="canGrid"></div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <button class="dispense-btn" id="dispenseBtn" type="button" onclick="dispenseCan()">
+          <span>🥫</span> 예문 캔 뽑기! (도파민 충전)
+        </button>
+      </div>
+
+      <div class="vending-tray" style="margin-top: 14px;">
+        <div class="tray-flap" id="trayFlap">
+          <span>PUSH TO TAKE DRINK ⬇️</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="result-card-container" id="step2Sentence">
+      <article class="sentence-card">
+        <div class="sentence-card-tag" id="sentenceThemeTag">
+          <span>🥫</span> 예문 캔 개봉!
+        </div>
+
+        <div class="tooltip-hint">
+          <span>👆</span> <b>단어에 마우스를 올리거나(터치)</b> 한국어 뜻을 확인해보세요!
+        </div>
+
+        <div class="english-sentence-box">
+          <div class="english-sentence" id="displayEngSentence"></div>
+        </div>
+
+        <div>
+          <button class="korean-toggle-btn" id="koreanToggleBtn" type="button" onclick="toggleKoreanTranslation()">
+            <span>🔍</span> <span id="koreanToggleText">한국어 뜻 보기</span>
+          </button>
+        </div>
+
+        <div class="korean-translation-box" id="displayKorSentence"></div>
+
+        <div class="grammar-tip-box" id="displayGrammarTip"></div>
+
+        <button class="start-quiz-btn" type="button" onclick="goToQuiz()">
+          <span>🔥</span> 확인 문제 풀고 도파민 폭발시키기!
+        </button>
+      </article>
+    </section>
+
+    <section class="result-card-container" id="step3Quiz">
+      <article class="quiz-card">
+        <div class="quiz-badge" id="quizThemeBadge">
+          <span>⚡</span> 병맛 실전 퀴즈
+        </div>
+
+        <div class="quiz-prompt">
+          빈칸 ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) 에 들어갈 알맞은 관계대명사를 골라보세요!
+        </div>
+
+        <div class="quiz-sentence-box" id="quizSentence"></div>
+
+        <div class="quiz-options" id="quizOptionsBox"></div>
+
+        <div class="feedback-banner" id="feedbackBanner">
+          <div class="feedback-head" id="feedbackHead"></div>
+          <div class="feedback-body" id="feedbackBody"></div>
+        </div>
+
+        <div class="wrong-action-buttons" id="wrongActionButtons">
+          <button class="retry-btn" type="button" onclick="retryQuiz()">
+            <span>🔄</span> 다시 풀기
+          </button>
+          <button class="reveal-btn" type="button" onclick="revealAnswer()">
+            <span>👀</span> 정답 공개
+          </button>
+        </div>
+
+        <div class="finish-action-box" id="finishActionBox">
+          <button class="restart-btn" type="button" onclick="resetToVending()">
+            <span>🔄</span> 다른 예문 또 뽑기 (다시 하기)
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <footer class="vending-footer">
+      🔒 개인정보 안전: 입력한 이름은 기기에 일절 저장되지 않으며 즉시 사라집니다.
+    </footer>
+  </main>
+
+  <script>
+    /* ========================================================
+       1. 순수 Web Audio API 사운드 시스템
+       ======================================================== */
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      isSoundOn = !isSoundOn;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundText = document.getElementById('soundText');
+      if (isSoundOn) {
+        soundIcon.textContent = '🔊';
+        soundText.textContent = '소리 ON';
+        playTone(600, 0.1, 'sine');
+      } else {
+        soundIcon.textContent = '🔇';
+        soundText.textContent = '소리 OFF';
+      }
+    }
+
+    function playTone(freq, duration, type = 'sine', gainVal = 0.15) {
+      if (!isSoundOn) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio play error:', e);
+      }
+    }
+
+    function playCoinSound() {
+      if (!isSoundOn) return;
+      playTone(987, 0.08, 'square', 0.1);
+      setTimeout(() => playTone(1318, 0.25, 'square', 0.12), 90);
+    }
+
+    function playDropSound() {
+      if (!isSoundOn) return;
+      playTone(180, 0.15, 'sawtooth', 0.2);
+      setTimeout(() => playTone(120, 0.25, 'triangle', 0.25), 140);
+    }
+
+    function playCorrectSound() {
+      if (!isSoundOn) return;
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => {
+          playTone(freq, 0.22, 'sine', 0.2);
+        }, idx * 110);
+      });
+    }
+
+    function playWrongSound() {
+      if (!isSoundOn) return;
+      playTone(260, 0.18, 'sawtooth', 0.2);
+      setTimeout(() => playTone(220, 0.25, 'sawtooth', 0.2), 200);
+    }
+
+    function playClickSound() {
+      if (!isSoundOn) return;
+      playTone(700, 0.05, 'triangle', 0.1);
+    }
+
+    /* ========================================================
+       2. 병맛 단어장 대규모 업데이트 (마우스 올리면 뜻 보임)
+       ======================================================== */
+    const WORD_DICTIONARY = {
+      // 기본 단어
+      "a": "하나의", "an": "하나의", "the": "그", "is": "~이다", "are": "~이다", 
+      "was": "~였다", "were": "~였다", "in": "~안에", "on": "~위에", "at": "~에", 
+      "with": "~와(과) 함께", "from": "~로부터", "to": "~에게 / ~로", "of": "~의", 
+      "for": "~를 위해", "by": "~에 의해", "he": "그는", "she": "그녀는", "it": "그것은", 
+      "they": "그들은", "his": "그의", "her": "그녀의", "their": "그들의", "its": "그것의", 
+      "my": "나의", "your": "너의", "our": "우리의", "and": "그리고", "but": "하지만",
+      
+      // 관계대명사
+      "who": "~하는 (사람 관계대명사)",
+      "which": "~하는 (사물/동물 관계대명사)",
+      "whose": "~의 (소유격 관계대명사)",
+      "that": "~하는 (만능 관계대명사)",
+      "what": "~하는 것 (선행사를 삼킨 관계대명사)",
+
+      // 기상천외한 병맛 단어들
+      "legendary": "전설의", "mixed": "섞었다", "mint": "민트", "chocolate": "초코", 
+      "spicy": "매운", "tteokbokki": "떡볶이", "swallowed": "삼켰다", "flying": "날아다니는", 
+      "sausage": "소시지", "bounces": "통통 튀다", "like": "~처럼", "superball": "탱탱볼", 
+      "fought": "싸웠다", "robot": "로봇", "chef": "요리사", "laser": "레이저", "eyes": "눈", 
+      "fry": "튀기다", "pork": "돼지", "cutlets": "돈가스(복수)", "kissed": "뽀뽀했다", 
+      "handsome": "잘생긴", "zombie": "좀비", "brushes": "양치질하다", "teeth": "이빨", 
+      "garlic": "마늘", "paste": "페이스트/반죽", "riding": "타고 있는", "mutant": "돌연변이", 
+      "pigeon": "비둘기", "poop": "똥", "can": "할 수 있다", "cure": "치료하다", 
+      "virus": "바이러스", "threw": "던졌다", "stinky": "지독하게 냄새나는", "sock": "양말", 
+      "exploded": "폭발했다", "wiped": "전멸시켰다 (wipe out)", "out": "밖으로/완전히",
+      "king": "왕", "emperor": "황제", "gave": "주었다", "no": "아무도 ~않다", "one": "사람", 
+      "expected": "예상했다", "golden": "황금", "toilet": "변기/화장실", "brush": "솔/브러시", 
+      "slapped": "뺨을 때렸다", "snobby": "건방진", "duke": "공작", "wearing": "입고 있는", 
+      "pink": "분홍색", "hello": "안녕", "kitty": "키티", "underwear": "팬티/속옷",
+      "drank": "마셨다", "magic": "마법의", "potion": "물약", "turns": "바꾸다", 
+      "sweat": "땀", "into": "~으로", "strawberry": "딸기", "milk": "우유", "bald": "대머리의", 
+      "ghost": "귀신", "lives": "살다", "begged": "구걸했다", "hair": "머리카락", 
+      "growth": "성장/발모", "shampoo": "샴푸", "met": "만났다", "skeleton": "해골", 
+      "ribs": "갈비뼈", "made": "만들어진", "shiny": "빛나는", "glow": "야광의", 
+      "sticks": "막대기들(야광봉)", "ate": "먹었다", "cursed": "저주받은", "chalk": "분필", 
+      "makes": "만들다", "you": "너를", "rap": "랩하다", "eminem": "에미넴", "during": "~동안", 
+      "math": "수학", "class": "수업", "crazy": "미친", "alien": "외계인", "conquered": "정복했다", 
+      "galaxy": "은하계", "single": "단 하나의", "green": "녹색", "onion": "양파 (파: green onion)", 
+      "stole": "훔쳤다", "ufo": "미확인 비행물체", "uses": "사용하다", "farts": "방귀", 
+      "as": "~로써", "hyper-speed": "초고속", "fuel": "연료", "punched": "주먹으로 쳤다", 
+      "space": "우주", "monster": "괴물", "face": "얼굴", "looks": "보이다", "squished": "짓눌린", 
+      "potato": "감자", "proved": "증명했다", "real": "진짜", "talent": "재능/특기", 
+      "by": "~함으로써", "breaking": "부수기/깨기", "watermelons": "수박들", "with": "~로",
+      "head": "머리", "fans": "팬들", "worship": "숭배하다", "twerks": "트월킹을 추다", 
+      "beautifully": "아름답게", "while": "~하는 동안", "singing": "노래하는 중", 
+      "national": "국가의", "anthem": "애국가", "joined": "가입했다", "weird": "이상한", 
+      "group": "그룹/아이돌", "members": "멤버들", "only": "오직", "speak": "말하다", 
+      "dolphin": "돌고래", "sounds": "소리들", "student": "학생", "second": "초"
+    };
+
+    /* ========================================================
+       3. 100% 병맛 예문 테마 데이터베이스
+       ======================================================== */
+    const THEMES = [
+      {
+        id: 'lunch',
+        name: '1분컷 급식실',
+        flavor: '민트초코 떡볶이맛',
+        icon: '🍱',
+        templates: [
+          {
+            eng: "{NAME} is the legendary student [who] mixed mint chocolate with spicy tteokbokki.",
+            kor: "{NAME}은(는) 민트 초코와 매운 떡볶이를 섞은 전설의 학생이다.",
+            tip: "👉 선행사 'the legendary student'(사람) 뒤에 주어 역할을 하는 <b>who</b>를 씁니다! (진정한 미식가네요)",
+            quiz: {
+              sentence: "{NAME} swallowed a flying sausage ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) bounces like a superball.",
+              options: ["who", "which", "whose"],
+              answerIndex: 1,
+              explanation: "선행사 'a flying sausage'(사물)가 탱탱볼처럼 튀어 오르므로 <b>which</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} swallowed a flying sausage [which] bounces like a superball.",
+            kor: "{NAME}은(는) 탱탱볼처럼 튀어 오르는 날아다니는 소시지를 꿀꺽 삼켰다.",
+            tip: "👉 선행사 'a flying sausage'(사물)를 설명하는 주격 관계대명사 <b>which</b>!",
+            quiz: {
+              sentence: "{NAME} fought a robot chef ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) laser eyes fry pork cutlets in a second.",
+              options: ["who", "which", "whose"],
+              answerIndex: 2,
+              explanation: "로봇 요리사'의(whose)' 레이저 눈! 소유를 나타내므로 <b>whose</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} fought a robot chef [whose] laser eyes fry 500 pork cutlets in a second.",
+            kor: "{NAME}은(는) 레이저 눈으로 1초 만에 500개의 돈가스를 튀기는 로봇 요리사와 싸웠다.",
+            tip: "👉 로봇 요리사의(whose) 레이저 눈! 뒤에 명사(laser eyes)가 오므로 소유격 <b>whose</b>를 씁니다.",
+            quiz: {
+              sentence: "The principal ate ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) {NAME} mixed with mint chocolate.",
+              options: ["what", "who", "which"],
+              answerIndex: 0,
+              explanation: "앞에 수식할 선행사가 없고 '{NAME}이 민초와 섞은 것'이라는 뜻이므로 <b>what</b>이 정답입니다!"
+            }
+          }
+        ]
+      },
+      {
+        id: 'zombie',
+        name: '좀비 사태',
+        flavor: '마늘 양치 좀비맛',
+        icon: '🧟',
+        templates: [
+          {
+            eng: "{NAME} kissed a handsome zombie [who] brushes his teeth with garlic paste.",
+            kor: "{NAME}은(는) 마늘 반죽으로 양치질을 하는 잘생긴 좀비에게 뽀뽀했다.",
+            tip: "👉 선행사 'a handsome zombie'(사람 취급) 뒤에서 주어 역할을 하는 <b>who</b>!",
+            quiz: {
+              sentence: "{NAME} is riding a mutant pigeon ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) poop can cure the zombie virus.",
+              options: ["who", "which", "whose"],
+              answerIndex: 2,
+              explanation: "돌연변이 비둘기'의(whose)' 똥(poop)이므로 소유격 관계대명사 <b>whose</b>가 정답!"
+            }
+          },
+          {
+            eng: "{NAME} is riding a mutant pigeon [whose] poop can cure the zombie virus.",
+            kor: "{NAME}은(는) 똥으로 좀비 바이러스를 치료할 수 있는 돌연변이 비둘기를 타고 있다.",
+            tip: "👉 돌연변이 비둘기'의' 똥! 소유격 관계대명사 <b>whose</b>가 명사 앞을 딱 지켜줍니다.",
+            quiz: {
+              sentence: "{NAME} threw a stinky sock ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) exploded and wiped out the zombie king.",
+              options: ["who", "which", "whose"],
+              answerIndex: 1,
+              explanation: "냄새나는 양말(a stinky sock)은 사물이므로 주격 관계대명사 <b>which</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} threw a stinky sock [which] exploded and wiped out the zombie king.",
+            kor: "{NAME}은(는) 냅다 폭발해서 좀비 왕을 전멸시킨 냄새나는 양말을 던졌다.",
+            tip: "👉 냄새나는 양말(a stinky sock)은 사물이니까 <b>which</b>(또는 that)로 수식합니다!",
+            quiz: {
+              sentence: "We couldn't believe ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) {NAME} gave to the handsome zombie.",
+              options: ["what", "who", "which"],
+              answerIndex: 0,
+              explanation: "선행사가 없고 '{NAME}이 좀비에게 준 것'이라는 뜻이므로 <b>what</b>이 정답입니다!"
+            }
+          }
+        ]
+      },
+      {
+        id: 'romance',
+        name: '로맨스 판타지',
+        flavor: '헬로키티 속옷맛',
+        icon: '👑',
+        templates: [
+          {
+            eng: "The emperor gave {NAME} [what] no one expected: a golden toilet brush.",
+            kor: "황제는 아무도 예상하지 못한 것, 바로 황금 변기 솔을 {NAME}에게 하사했다.",
+            tip: "👉 선행사 없이 '~하는 것(아무도 예상 못 한 것)'으로 해석될 때는 <b>what</b>을 씁니다!",
+            quiz: {
+              sentence: "{NAME} slapped a snobby duke ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) was wearing pink Hello Kitty underwear.",
+              options: ["which", "who", "whose"],
+              answerIndex: 1,
+              explanation: "선행사 'a snobby duke'(건방진 공작)는 사람이므로 <b>who</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} slapped a snobby duke [who] was wearing pink Hello Kitty underwear.",
+            kor: "{NAME}은(는) 분홍색 헬로키티 팬티를 입고 있던 건방진 공작의 뺨을 때렸다.",
+            tip: "👉 건방진 공작(사람)을 꾸며주는 주격 관계대명사 <b>who</b>! (진정한 로판 사이다네요)",
+            quiz: {
+              sentence: "{NAME} drank a magic potion ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) turns sweat into strawberry milk.",
+              options: ["who", "whose", "that"],
+              answerIndex: 2,
+              explanation: "선행사 'a magic potion'(마법 물약)은 사물이므로 which나 <b>that</b>을 써야 합니다!"
+            }
+          },
+          {
+            eng: "{NAME} drank a magic potion [that] turns sweat into strawberry milk.",
+            kor: "{NAME}은(는) 땀을 흘리면 딸기 우유로 변하게 하는 마법의 물약을 마셨다.",
+            tip: "👉 <b>that</b>은 사물(마법 물약)과 사람 모두 쓸 수 있는 만능 치트키입니다!",
+            quiz: {
+              sentence: "The princess lost the diamond ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) {NAME} found in the golden toilet.",
+              options: ["which", "who", "what"],
+              answerIndex: 0,
+              explanation: "다이아몬드(사물)를 꾸미는 목적격 관계대명사이므로 <b>which</b>가 맞습니다!"
+            }
+          }
+        ]
+      },
+      {
+        id: 'mystery',
+        name: '학교 괴담',
+        flavor: '대머리 귀신 샴푸맛',
+        icon: '👻',
+        templates: [
+          {
+            eng: "A bald ghost [that] lives in the toilet begged {NAME} for hair growth shampoo.",
+            kor: "화장실에 사는 대머리 귀신이 {NAME}의 바짓가랑이를 잡고 발모 샴푸를 구걸했다.",
+            tip: "👉 <b>that</b>은 귀신(사람/사물)도 다 받아주는 만능 관계대명사입니다!",
+            quiz: {
+              sentence: "{NAME} met a skeleton ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ribs are made of shiny glow sticks.",
+              options: ["who", "which", "whose"],
+              answerIndex: 2,
+              explanation: "해골'의(whose)' 갈비뼈(ribs)이므로 소유격 관계대명사 <b>whose</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} met a skeleton [whose] ribs are made of shiny glow sticks.",
+            kor: "{NAME}은(는) 갈비뼈가 콘서트장 야광봉으로 만들어진 해골을 만났다.",
+            tip: "👉 해골의(whose) 갈비뼈(ribs)! 뒤에 명사가 이어지면 묻지도 따지지도 않고 소유격 <b>whose</b>!",
+            quiz: {
+              sentence: "{NAME} ate a cursed chalk ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) makes you rap like Eminem during math class.",
+              options: ["who", "which", "whose"],
+              answerIndex: 1,
+              explanation: "선행사 'a cursed chalk'(저주받은 분필)는 사물이므로 <b>which</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} ate a cursed chalk [which] makes you rap like Eminem during math class.",
+            kor: "{NAME}은(는) 수학 시간에 에미넴처럼 미친 듯이 랩을 하게 만드는 저주받은 분필을 먹어버렸다.",
+            tip: "👉 선행사 '저주받은 분필'(사물) 뒤에 주어로 쓰인 관계대명사 <b>which</b>!",
+            quiz: {
+              sentence: "I heard ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) the bald ghost shouted when {NAME} took his shampoo.",
+              options: ["what", "which", "that"],
+              answerIndex: 0,
+              explanation: "선행사 없이 '대머리 귀신이 소리친 것'이라는 명사절을 이끌므로 <b>what</b>이 정답입니다!"
+            }
+          }
+        ]
+      },
+      {
+        id: 'space',
+        name: '우주 대전쟁',
+        flavor: '방귀 추진 UFO맛',
+        icon: '🚀',
+        templates: [
+          {
+            eng: "{NAME} is the crazy alien [who] conquered the galaxy with a single green onion.",
+            kor: "{NAME}은(는) 대파 한 뿌리로 은하계를 평정한 미친 외계인이다.",
+            tip: "👉 선행사 'the crazy alien'(외계인=사람 취급)을 꾸미는 주격 관계대명사 <b>who</b>!",
+            quiz: {
+              sentence: "{NAME} stole a UFO ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) uses farts as hyper-speed fuel.",
+              options: ["which", "who", "whose"],
+              answerIndex: 0,
+              explanation: "UFO(사물)가 방귀를 연료로 쓰므로, 사물 주격 관계대명사 <b>which</b>가 정답입니다!"
+            }
+          },
+          {
+            eng: "{NAME} stole a UFO [which] uses farts as hyper-speed fuel.",
+            kor: "{NAME}은(는) 방귀를 초고속 연료로 뿜으며 날아가는 UFO를 훔쳤다.",
+            tip: "👉 선행사 'a UFO'(사물) 뒤에 동사가 오므로 주격 관계대명사 <b>which</b>!",
+            quiz: {
+              sentence: "{NAME} punched a space monster ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) face looks like a squished potato.",
+              options: ["who", "which", "whose"],
+              answerIndex: 2,
+              explanation: "우주 괴물'의(whose)' 얼굴(face)이므로 소유격 관계대명사 <b>whose</b>가 정답!"
+            }
+          },
+          {
+            eng: "{NAME} punched a space monster [whose] face looks like a squished potato.",
+            kor: "{NAME}은(는) 얼굴이 짓눌린 삶은 감자처럼 생겼던 우주 괴물에게 명치 자국을 남겼다.",
+            tip: "👉 우주 괴물의(whose) 얼굴! 소유를 나타내므로 <b>whose</b>를 씁니다.",
+            quiz: {
+              sentence: "Do you know ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) {NAME} did to the crazy alien with a green onion?",
+              options: ["that", "what", "which"],
+              answerIndex: 1,
+              explanation: "선행사 없이 '{NAME}이 파로 한 짓(것)'을 뜻하므로 <b>what</b>이 정답입니다!"
+            }
+          }
+        ]
+      },
+      {
+        id: 'idol',
+        name: '아이돌 오디션',
+        flavor: '돌고래 트월킹맛',
+        icon: '🎤',
+        templates: [
+          {
+            eng: "{NAME} proved [what] real talent is by breaking 100 watermelons with their head.",
+            kor: "{NAME}은(는) 자신의 머리로 수박 100통을 깨부수며 진짜 재능이 무엇인지(=재능인 것)를 증명했다.",
+            tip: "👉 명사 선행사 없이 '~하는 것(진짜 재능인 것)'으로 해석될 때는 <b>what</b>!",
+            quiz: {
+              sentence: "Fans worship {NAME} ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) twerks beautifully while singing the national anthem.",
+              options: ["who", "which", "whose"],
+              answerIndex: 0,
+              explanation: "선행사 '{NAME}'(사람)이 애국가 부르며 트월킹을 추므로 주격 <b>who</b>가 정답!"
+            }
+          },
+          {
+            eng: "Fans worship {NAME} [who] twerks beautifully while singing the national anthem.",
+            kor: "수만 명의 팬들은 애국가를 부르며 경건하고 아름답게 트월킹을 추는 {NAME}을(를) 숭배한다.",
+            tip: "👉 선행사 사람({NAME})을 꾸미는 주격 관계대명사 <b>who</b>!",
+            quiz: {
+              sentence: "{NAME} joined a weird group ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) members only speak in dolphin sounds.",
+              options: ["which", "who", "whose"],
+              answerIndex: 2,
+              explanation: "이상한 그룹'의(whose)' 멤버들(members)이므로 소유격 관계대명사 <b>whose</b>가 정답!"
+            }
+          },
+          {
+            eng: "{NAME} joined a weird group [whose] members only speak in alien dolphin sounds.",
+            kor: "{NAME}은(는) 멤버들이 외계 돌고래 초음파 소리로만 대화하는 이상한 그룹에 합류했다.",
+            tip: "👉 그 이상한 그룹의(whose) 멤버들! 명사 앞에는 소유격 <b>whose</b>를 씁니다.",
+            quiz: {
+              sentence: "The agency finally released ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) {NAME} recorded in the restroom.",
+              options: ["what", "which", "who"],
+              answerIndex: 0,
+              explanation: "선행사 없이 '{NAME}이 화장실에서 녹음한 것'을 의미하므로 <b>what</b>이 정답입니다!"
+            }
+          }
+        ]
+      }
+    ];
+
+    const RANDOM_NAMES = ["민지", "정국", "지우", "은우", "카리나", "원영", "철수", "영희", "도윤", "서아", "하준", "시우"];
+
+    /* ========================================================
+       4. 상태 관리 변수
+       ======================================================== */
+    let selectedThemeIndex = 0;
+    let currentItem = null;
+    let currentQuiz = null;
+    let studentName = "";
+    let isAnswered = false;
+    let isKoreanVisible = false;
+    
+    // [핵심 추가] 테마별 이미 본 예문 인덱스를 저장하는 히스토리 객체
+    let templateHistory = {};
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderThemeGrid();
+      document.getElementById('studentNameInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          dispenseCan();
+        }
+      });
+    });
+
+    function renderThemeGrid() {
+      const grid = document.getElementById('canGrid');
+      grid.innerHTML = '';
+      THEMES.forEach((t, idx) => {
+        const can = document.createElement('div');
+        can.className = `can-item ${idx === selectedThemeIndex ? 'selected' : ''}`;
+        can.onclick = () => selectTheme(idx);
+        can.innerHTML = `
+          <div class="can-icon">${t.icon}</div>
+          <div class="can-name">${t.name}</div>
+        `;
+        grid.appendChild(can);
+      });
+    }
+
+    function selectTheme(idx) {
+      playClickSound();
+      selectedThemeIndex = idx;
+      renderThemeGrid();
+    }
+
+    function insertRandomName() {
+      playClickSound();
+      const rand = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
+      document.getElementById('studentNameInput').value = rand;
+      document.getElementById('studentNameInput').focus();
+    }
+
+    function buildSentenceWithTooltips(templateEng, safeName) {
+      const fullText = templateEng.replace(/\{NAME\}/g, safeName);
+      const tokens = fullText.split(' ');
+      
+      const htmlTokens = tokens.map(token => {
+        const relMatch = token.match(/^\[(.*?)\]([.,?!:;]?)$/);
+        if (relMatch) {
+          const relWord = relMatch[1];
+          const punct = relMatch[2] || '';
+          const meaning = WORD_DICTIONARY[relWord.toLowerCase()] || "관계대명사";
+          return `<span class="vocab-word rel-pronoun-hl" data-meaning="${meaning}" onclick="handleWordClick(this, event)">${escapeHtml(relWord)}</span>${punct}`;
+        }
+
+        const wordMatch = token.match(/^([^a-zA-Z0-9가-힣]*)([a-zA-Z0-9가-힣'-]+)([^a-zA-Z0-9가-힣]*)$/);
+        if (!wordMatch) {
+          return escapeHtml(token);
+        }
+
+        const prefix = wordMatch[1];
+        const rawWord = wordMatch[2];
+        const suffix = wordMatch[3];
+        const lowerWord = rawWord.toLowerCase();
+
+        let meaning = "";
+        if (rawWord === safeName) {
+          meaning = `주인공 이름 (${safeName})`;
+        } else if (WORD_DICTIONARY[lowerWord]) {
+          meaning = WORD_DICTIONARY[lowerWord];
+        } else {
+          const baseWord1 = lowerWord.replace(/s$/, '');
+          const baseWord2 = lowerWord.replace(/ed$/, '');
+          const baseWord3 = lowerWord.replace(/ing$/, '');
+          meaning = WORD_DICTIONARY[baseWord1] || WORD_DICTIONARY[baseWord2] || WORD_DICTIONARY[baseWord3] || "단어";
+        }
+
+        return `${escapeHtml(prefix)}<span class="vocab-word" data-meaning="${meaning}" onclick="handleWordClick(this, event)">${escapeHtml(rawWord)}</span>${escapeHtml(suffix)}`;
+      });
+
+      return htmlTokens.join(' ');
+    }
+
+    function handleWordClick(elem, event) {
+      event.stopPropagation();
+      playClickSound();
+      const wasActive = elem.classList.contains('active-tip');
+      document.querySelectorAll('.vocab-word.active-tip').forEach(el => el.classList.remove('active-tip'));
+      if (!wasActive) {
+        elem.classList.add('active-tip');
+      }
+    }
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.vocab-word.active-tip').forEach(el => el.classList.remove('active-tip'));
+    });
+
+    /* ========================================================
+       5. 캔 배출 로직 (중복 방지 알고리즘 적용)
+       ======================================================== */
+    function dispenseCan() {
+      initAudio();
+      playCoinSound();
+
+      let inputName = document.getElementById('studentNameInput').value.trim();
+      if (!inputName) {
+        inputName = "도파민 대장";
+      }
+      studentName = inputName;
+
+      const trayFlap = document.getElementById('trayFlap');
+      trayFlap.classList.add('open');
+      setTimeout(() => playDropSound(), 200);
+
+      const theme = THEMES[selectedThemeIndex];
+      const themeId = theme.id;
+      
+      // [핵심 추가] 해당 테마의 히스토리가 없으면 배열 생성
+      if (!templateHistory[themeId]) {
+        templateHistory[themeId] = [];
+      }
+
+      // [핵심 추가] 히스토리에 없는(아직 안 본) 인덱스들만 필터링
+      let availableIndices = theme.templates
+        .map((_, i) => i)
+        .filter(i => !templateHistory[themeId].includes(i));
+
+      // [핵심 추가] 만약 모든 예문을 다 봤다면 히스토리를 초기화 (리셋)
+      if (availableIndices.length === 0) {
+        templateHistory[themeId] = [];
+        availableIndices = theme.templates.map((_, i) => i);
+      }
+
+      // 남은 예문 중 하나를 랜덤으로 선택하고 히스토리에 추가
+      const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+      templateHistory[themeId].push(randomIndex);
+
+      const tpl = theme.templates[randomIndex];
+
+      const safeName = escapeHtml(studentName);
+      const engHtmlWithTooltips = buildSentenceWithTooltips(tpl.eng, safeName);
+      const korReplaced = tpl.kor.replace(/\{NAME\}/g, safeName);
+      const tipReplaced = tpl.tip.replace(/\{NAME\}/g, safeName);
+      const quizSentenceReplaced = tpl.quiz.sentence.replace(/\{NAME\}/g, safeName);
+      const quizExplReplaced = tpl.quiz.explanation.replace(/\{NAME\}/g, safeName);
+
+      currentItem = {
+        themeName: theme.flavor,
+        themeIcon: theme.icon,
+        engHtml: engHtmlWithTooltips,
+        kor: korReplaced,
+        tip: tipReplaced,
+        quiz: {
+          sentence: quizSentenceReplaced,
+          options: tpl.quiz.options,
+          answerIndex: tpl.quiz.answerIndex,
+          explanation: quizExplReplaced
+        }
+      };
+
+      currentQuiz = currentItem.quiz;
+
+      setTimeout(() => {
+        trayFlap.classList.remove('open');
+        showStep2Sentence();
+      }, 500);
+    }
+
+    function showStep2Sentence() {
+      document.getElementById('step1Showcase').style.display = 'none';
+      document.getElementById('step3Quiz').style.display = 'none';
+
+      const step2 = document.getElementById('step2Sentence');
+      step2.style.display = 'flex';
+
+      document.getElementById('sentenceThemeTag').innerHTML = `
+        <span>${currentItem.themeIcon}</span> ${currentItem.themeName} 캔 개봉!
+      `;
+      document.getElementById('displayEngSentence').innerHTML = currentItem.engHtml;
+      document.getElementById('displayKorSentence').innerHTML = currentItem.kor;
+      document.getElementById('displayGrammarTip').innerHTML = `
+        <div class="grammar-tip-title">💡 [도파민 팡팡! 문법 꿀팁]</div>
+        <div>${currentItem.tip}</div>
+      `;
+
+      isKoreanVisible = false;
+      document.getElementById('displayKorSentence').style.display = 'none';
+      document.getElementById('koreanToggleText').textContent = '한국어 뜻 보기';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleKoreanTranslation() {
+      playClickSound();
+      isKoreanVisible = !isKoreanVisible;
+      const transBox = document.getElementById('displayKorSentence');
+      const toggleText = document.getElementById('koreanToggleText');
+
+      if (isKoreanVisible) {
+        transBox.style.display = 'block';
+        toggleText.textContent = '한국어 뜻 숨기기 🙈';
+      } else {
+        transBox.style.display = 'none';
+        toggleText.textContent = '한국어 뜻 보기 🔍';
+      }
+    }
+
+    function goToQuiz() {
+      playClickSound();
+      document.getElementById('step2Sentence').style.display = 'none';
+      const step3 = document.getElementById('step3Quiz');
+      step3.style.display = 'flex';
+
+      document.getElementById('quizThemeBadge').innerHTML = `
+        <span>${currentItem.themeIcon}</span> ${currentItem.themeName} 실전 퀴즈!
+      `;
+
+      document.getElementById('quizSentence').innerHTML = `
+        "${currentQuiz.sentence}"
+      `;
+
+      renderQuizOptions();
+      resetFeedbackUI();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderQuizOptions() {
+      const box = document.getElementById('quizOptionsBox');
+      box.innerHTML = '';
+      isAnswered = false;
+
+      currentQuiz.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.type = 'button';
+        btn.id = `optBtn_${idx}`;
+        btn.innerHTML = `
+          <span><b>${idx + 1}.</b> &nbsp; ${opt}</span>
+          <span class="option-indicator" id="indicator_${idx}"></span>
+        `;
+        btn.onclick = () => checkAnswer(idx);
+        box.appendChild(btn);
+      });
+    }
+
+    function resetFeedbackUI() {
+      const banner = document.getElementById('feedbackBanner');
+      banner.style.display = 'none';
+      banner.className = 'feedback-banner';
+      document.getElementById('wrongActionButtons').style.display = 'none';
+      document.getElementById('finishActionBox').style.display = 'none';
+    }
+
+    function checkAnswer(chosenIdx) {
+      if (isAnswered) return;
+      isAnswered = true;
+
+      const isCorrect = (chosenIdx === currentQuiz.answerIndex);
+      const chosenBtn = document.getElementById(`optBtn_${chosenIdx}`);
+      const chosenInd = document.getElementById(`indicator_${chosenIdx}`);
+
+      for (let i = 0; i < currentQuiz.options.length; i++) {
+        const btn = document.getElementById(`optBtn_${i}`);
+        btn.disabled = true;
+      }
+
+      const banner = document.getElementById('feedbackBanner');
+      const head = document.getElementById('feedbackHead');
+      const body = document.getElementById('feedbackBody');
+
+      if (isCorrect) {
+        playCorrectSound();
+        triggerConfetti();
+
+        chosenBtn.classList.add('correct-choice');
+        chosenInd.textContent = '⭕ 정답!';
+
+        banner.className = 'feedback-banner correct';
+        banner.style.display = 'block';
+        head.innerHTML = `<span>🎉</span> 도파민 대폭발! 정답입니다! (⭕)`;
+        body.innerHTML = `
+          <div style="margin-bottom:6px;"><b>정답: ${currentQuiz.options[currentQuiz.answerIndex]}</b></div>
+          <div>${currentQuiz.explanation}</div>
+        `;
+
+        document.getElementById('wrongActionButtons').style.display = 'none';
+        document.getElementById('finishActionBox').style.display = 'block';
+
+      } else {
+        playWrongSound();
+
+        chosenBtn.classList.add('wrong-choice');
+        chosenInd.textContent = '❌ 오답!';
+
+        banner.className = 'feedback-banner wrong';
+        banner.style.display = 'block';
+        head.innerHTML = `<span>💥</span> 아쉽지만 땡! (❌)`;
+        body.innerHTML = `
+          틀렸어도 괜찮아요! 한 번 더 도전하거나 정답을 확인해보세요.
+        `;
+
+        document.getElementById('wrongActionButtons').style.display = 'flex';
+        document.getElementById('finishActionBox').style.display = 'none';
+      }
+    }
+
+    function retryQuiz() {
+      playClickSound();
+      isAnswered = false;
+
+      for (let i = 0; i < currentQuiz.options.length; i++) {
+        const btn = document.getElementById(`optBtn_${i}`);
+        btn.className = 'option-btn';
+        btn.disabled = false;
+        document.getElementById(`indicator_${i}`).textContent = '';
+      }
+
+      resetFeedbackUI();
+    }
+
+    function revealAnswer() {
+      playClickSound();
+
+      const correctBtn = document.getElementById(`optBtn_${currentQuiz.answerIndex}`);
+      correctBtn.classList.add('correct-choice');
+      document.getElementById(`indicator_${currentQuiz.answerIndex}`).textContent = '⭕ 정답';
+
+      const banner = document.getElementById('feedbackBanner');
+      const head = document.getElementById('feedbackHead');
+      const body = document.getElementById('feedbackBody');
+
+      banner.className = 'feedback-banner correct';
+      banner.style.display = 'block';
+      head.innerHTML = `<span>💡</span> 정답 및 도파민 해설 공개!`;
+      body.innerHTML = `
+        <div style="margin-bottom:6px;"><b>정답: ${currentQuiz.options[currentQuiz.answerIndex]}</b></div>
+        <div>${currentQuiz.explanation}</div>
+      `;
+
+      document.getElementById('wrongActionButtons').style.display = 'none';
+      document.getElementById('finishActionBox').style.display = 'block';
+    }
+
+    function resetToVending() {
+      playClickSound();
+      document.getElementById('step3Quiz').style.display = 'none';
+      document.getElementById('step2Sentence').style.display = 'none';
+      document.getElementById('step1Showcase').style.display = 'block';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    /* ========================================================
+       8. 정답 축하 파티클 캔버스 효과
+       ======================================================== */
+    const canvas = document.getElementById('fxCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerConfetti() {
+      particles = [];
+      const colors = ['#ff0077', '#00f3ff', '#fff200', '#00ff66', '#ff9900', '#ffffff'];
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 18,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          alpha: 1,
+          decay: Math.random() * 0.015 + 0.012
+        });
+      }
+      if (!animId) {
+        animateParticles();
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.4;
+        p.alpha -= p.decay;
+        p.rotation += p.rotSpeed;
+
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      }
+
+      if (particles.length > 0) {
+        animId = requestAnimationFrame(animateParticles);
+      } else {
+        animId = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  </script>
+</body>
+</html>
